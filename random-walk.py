@@ -26,22 +26,44 @@ start_point, = ax.plot([], [], 'go', markersize=10, label='Start')  # Point for 
 
 ax.legend()
 
+# 2nd way of plottin the walk without the ion()
+
+
+
 # Generate and plot the random walk
 steps = 100
 x_values, y_values = [], []
+window_size = 30
+
+
 
 for step, (x, y) in enumerate(random_walk(steps)):
-    x_values.append(x)
+    x_values.append(step)
     y_values.append(y)
-    
+
+    # If we exceed the window size, remove older points
+    if len(x_values) > window_size:
+        x_values.pop(0)
+        y_values.pop(0)
+
     if step == 0:
         start_point.set_data([x], [y])
-    
+
     line.set_data(x_values, y_values)
-    point.set_data([x], [y])
+    point.set_data([step], [y])
     
+        # Adjust x-limits for the rolling effect
+    if step < window_size:
+        ax.set_xlim(0, step + 1)  # When steps are less than window_size
+    else:
+        ax.set_xlim(step - window_size + 1, step + 1)  # Normal case
+
     ax.relim()  # Recalculate limits
     ax.autoscale_view(True, True, True)  # Autoscale
+        
+    
+    # Adjust x-limits for the rolling effect
+    ax.set_xlim(max(0, step - window_size + 1), step + 1)
     
     plt.title(f'Real-time Random Walk (Step {step + 1} of {steps})')
     fig.canvas.draw()
