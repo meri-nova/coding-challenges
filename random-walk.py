@@ -1,4 +1,5 @@
 import random
+import streamlit as st
 import matplotlib.pyplot as plt
 
 def random_walk(steps):
@@ -12,28 +13,25 @@ def random_walk(steps):
         y += dy
         yield x, y
 
-# Set up the plot
-plt.ion()  # Turn on interactive mode
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.set_title('Real-time Random Walk')
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.grid(True)
+st.title('Real-time Random Walk Simulation')
 
-line, = ax.plot([], [], 'b-')  # Line for the path
-point, = ax.plot([], [], 'ro', markersize=10)  # Point for current position
-start_point, = ax.plot([], [], 'go', markersize=10, label='Start')  # Point for start position
+# User input for number of steps and window size
+steps = st.slider('Number of Steps:', min_value=10, max_value=1000, value=100, step=1)
+window_size = st.slider('Rolling Window Size:', min_value=5, max_value=100, value=30, step=1)
 
-ax.legend()
-
-# 2nd way of plottin the walk without the ion()
-
-
+# Placeholder for the plot
+placeholder = st.empty()
 
 # Generate and plot the random walk
-steps = 100
 x_values, y_values = [], []
-window_size = 30
+
+#####
+
+# Initialize variables for plotting
+fig, ax = plt.subplots(figsize=(10, 6))
+start_point, = ax.plot([], [], 'go', markersize=10, label='Start')  # Initialize start_point
+line, = ax.plot([], [], 'b-', label='Path')  # Initialize line for path
+point, = ax.plot([], [], 'ro', markersize=10, label='Current Position')  # Initialize current position
 
 
 
@@ -45,6 +43,14 @@ for step, (x, y) in enumerate(random_walk(steps)):
     if len(x_values) > window_size:
         x_values.pop(0)
         y_values.pop(0)
+
+    # Plotting
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(x_values, y_values, 'b-', label='Path')
+    ax.plot(step, y, 'ro', markersize=10, label='Current Position')
+    ax.plot(0, 0, 'go', markersize=10, label='Start')  # At the origin (0, 0)
+
+
 
     if step == 0:
         start_point.set_data([x], [y])
@@ -58,13 +64,26 @@ for step, (x, y) in enumerate(random_walk(steps)):
     else:
         ax.set_xlim(step - window_size + 1, step + 1)  # Normal case
 
+
+
+    ax.set_title(f'Real-time Random Walk (Step {step + 1} of {steps})')
+    ax.set_xlabel('Steps')
+    ax.set_ylabel('Position')
+    ax.grid(True)
+    ax.legend(loc='upper left')
+
+
+    # Draw the plot
+    placeholder.pyplot(fig)  # Update the placeholder with the new plot
+
+    plt.clf()  # Clear the figure for the next iteration
+
+
     ax.relim()  # Recalculate limits
     ax.autoscale_view(True, True, True)  # Autoscale
         
     
-    # Adjust x-limits for the rolling effect
-    ax.set_xlim(max(0, step - window_size + 1), step + 1)
-    
+ 
     plt.title(f'Real-time Random Walk (Step {step + 1} of {steps})')
     fig.canvas.draw()
     fig.canvas.flush_events()
